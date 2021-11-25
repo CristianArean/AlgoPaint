@@ -5,16 +5,14 @@ ALTO_TABLERO = 20
 ANCHO_TABLERO = 20
 ANCHO_VENTANA = 700  # x
 ALTO_VENTANA = 700  # y
-WHITE = 0
-BLACK = 1
-RED = 2
-GREEN = 3
-BLUE = 4
-CYAN = 5
-YELLOW = 6
-MAGENTA = 7
-COLORES = ("black", "white", "red", "green",
-           "blue", "cyan", "yellow", "magenta")
+WHITE = (255, 255, 255) 
+BLACK = (0, 0, 0) 
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+CYAN = (0, 255, 255)
+YELLOW = (255, 255, 0)
+MAGENTA = (255, 0, 255) COLORES = ("black", "white", "red", "green", "blue", "cyan", "yellow", "magenta")
 
 
 def paint_nuevo(ancho, alto):
@@ -52,6 +50,7 @@ def actualizar_juego(paint, x, y):
         nuevo_tablero[fila][columna] = paint["numero_color"]
 
     paint["tablero"] = nuevo_tablero
+    print(paint["tablero"])
 
 def paint_mostrar(paint):
     '''dibuja la interfaz de la aplicación en la ventana'''
@@ -80,8 +79,30 @@ def paint_mostrar(paint):
                                pos_inicial_y2, fill=colores)  # cuadrados
         pos_inicial_y1 += 30
         pos_inicial_y2 += 30
-    print(paint["tablero"])
+
+
+    #boton de guardado 
+    pos_inicial_x = 50
+    pos_inicial_y = 650
+    pos_final_x = 190
+    pos_final_y = 680
+    #for botones in range(3): #el tres son cantidad de botones
+
+    gamelib.draw_rectangle(pos_inicial_x, pos_inicial_y, pos_final_x, pos_final_y, fill = "silver") #cantidad de botones
+    gamelib.draw_rectangle(190 + 30, pos_inicial_y, 360, pos_final_y, fill = "silver")
+    gamelib.draw_rectangle(360 + 30, pos_inicial_y, 360 + 30 + 140, pos_final_y, fill = "silver")
+    
+
     gamelib.draw_end()
+
+def cargar_archivo(ruta, paint):
+    pass
+
+def guardar_ppm(paint):
+    pass
+
+def guardar_jpg(paint):
+    pass
 
 def botones(paint, x, y):
     if x > 10 and x < 40 and y > 200 and y < 230:
@@ -100,6 +121,13 @@ def botones(paint, x, y):
         paint["numero_color"] = YELLOW
     elif x > 10 and x < 40 and y > 410 and y < 440:
         paint["numero_color"] = MAGENTA
+    if x > 50 and y > 650 and x < 190 y > 680:
+        ruta = gamelib.input("Ingrese ruta del archivo")
+        cargar_archivo(ruta, paint)
+    elif x > 190 + 30 and y > 650 and x < 360 y > 680:
+        guardar_ppm(paint):
+    elif x > 360 and y > 650 and x < 360 + 30 + 140 y > 680:
+        guardar_jpg(paint)
     else:
         pass 
 
@@ -116,18 +144,18 @@ def main():
         ev = gamelib.wait()
         if not ev:
             break 
-        if ev.type == gamelib.EventType.ButtonPress:
+        if ev.type == gamelib.EventType.ButtonPress and ev.mouse_button == 1:
             print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y # averiguamos la posición donde se hizo click
-            botones(paint, x, y)
+            #botones(paint, x, y)
             
             paint = actualizar_juego(paint, x, y)
-        """ elif ev.type == gamelib.EventType.Motion:
+        elif ev.type == gamelib.EventType.Motion:
             print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
         elif ev.type == gamelib.EventType.ButtonRelease and ev.mouse_button == 1:
             print(f'se ha soltado el botón del mouse: {ev.x} {ev.y}')
         elif ev.type == gamelib.EventType.KeyPress:
-            print(f'se ha presionado la tecla: {ev.key}')"""
+            print(f'se ha presionado la tecla: {ev.key}')
         #if ev.type == gamelib.EventType.ButtonPress:
             # El usuario presionó un botón del mouse
         
