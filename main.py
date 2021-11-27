@@ -14,7 +14,10 @@ CYAN = (0, 255, 255)
 YELLOW = (255, 255, 0)
 MAGENTA = (255, 0, 255) 
 COLORES = ("black", "white", "red", "green", "blue", "cyan", "yellow", "magenta")
-
+MENSAJE_ELIJA_COLOR = "ingrese en formato r, g, b el color que quiere ingresar"
+MENSAJE_NO_ELIGIO_COLOR = "No se eligió ningun color"
+MENSAJE_EN_DONDE_GUARDAR_ARCHIVO = "en que ruta quiere guardar el archivo?"
+MENSAJE_RUTA = "Ingrese ruta del archivo"
 
 def paint_nuevo(ancho, alto):
     '''inicializa el estado del programa con una imagen vacía de ancho x alto pixels'''
@@ -42,16 +45,40 @@ def copiador(paint):
 
     return nuevo_tablero
 
-def actualizar_juego(paint, x, y):
+def paint_actualizar(paint, x, y):
     nuevo_tablero = copiador(paint)
-    
-    if x > 50 and x < 650 and y > 45 and y < 645:
-        fila = int((x - 50) / 30)
-        columna = int((y - 45) / 30)
-        nuevo_tablero[fila][columna] = paint["numero_color"]
+    if x > 10 and x < 40 and y > 200 and y < 230: #dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
+        paint["numero_color"] = BLACK
+    elif x > 10 and x < 40 and y > 230 and y < 260:
+        paint["numero_color"] = WHITE
+    elif x > 10 and x < 40 and y > 260 and y < 290:
+        paint["numero_color"] = RED 
+    elif x > 10 and x < 40 and y > 290 and y < 320:
+        paint["numero_color"] = GREEN
+    elif x > 10 and x < 40 and y > 320 and y < 350:
+        paint["numero_color"] = BLUE 
+    elif x > 10 and x < 40 and y > 350 and y < 380:
+        paint["numero_color"] = CYAN
+    elif x > 10 and x < 40 and y > 380 and y < 410:
+        paint["numero_color"] = YELLOW
+    elif x > 10 and x < 40 and y > 410 and y < 440:
+        paint["numero_color"] = MAGENTA
+    elif x > 10 and x < 40 and y > 440 and y < 470:
+        nuevo_color(paint)
+    elif x > 50 and y > 650 and x < 190 and y < 680:
+        ruta = gamelib.input(MENSAJE_RUTA)
+        cargar_archivo(ruta, paint)
+    elif x > 190 + 30 and y > 650 and x < 360 and y < 680:
+        guardar_ppm(paint)
+    elif x > 390 and y > 650 and x < 360 + 30 + 140 and y < 680:
+        guardar_jpg(paint)
+    elif x > 50 and x < 650 and y > 45 and y < 645:
+        filas = int((y - 50) / 30)
+        columnas = int((x - 45) / 30)
+        nuevo_tablero[filas][columnas] = paint["numero_color"]
 
     paint["tablero"] = nuevo_tablero
-    print(paint["tablero"])
+    return paint
 
 def paint_mostrar(paint):
     '''dibuja la interfaz de la aplicación en la ventana'''
@@ -64,7 +91,6 @@ def paint_mostrar(paint):
 
     for i in range(len(paint["tablero"])):
         for j in range(len(paint["tablero"])):  
-        #if paint["tablero"][i][j] == paint["numero_color"]:
             gamelib.draw_rectangle(pos_inicial_x1, pos_inicial_y1, pos_inicial_x2, pos_inicial_y2, fill= f'#{paint["tablero"][i][j][0]:02x}{paint["tablero"][i][j][1]:02x}{paint["tablero"][i][j][2]:02x}')
             
 
@@ -73,6 +99,7 @@ def paint_mostrar(paint):
 
         pos_inicial_x1 = ANCHO_VENTANA * 7.1428 / 100  # 50
         pos_inicial_x2 = ANCHO_VENTANA * 11.4285 / 100
+            
         pos_inicial_y1 += 30
         pos_inicial_y2 += 30
 
@@ -80,10 +107,11 @@ def paint_mostrar(paint):
     pos_inicial_y2 = 225
     indice = 0
     for colores in COLORES:
-        gamelib.draw_rectangle(10, pos_inicial_y1, 40,
-                               pos_inicial_y2, fill=colores)  # cuadrados
+        gamelib.draw_rectangle(10, pos_inicial_y1, 40, pos_inicial_y2, fill=colores)  # cuadrados
         pos_inicial_y1 += 30
         pos_inicial_y2 += 30
+    
+    gamelib.draw_image('signo_mas.gif', 10, 440)
 
 
     #boton de guardado 
@@ -104,22 +132,33 @@ def paint_mostrar(paint):
     gamelib.draw_end()
 
 def cargar_archivo(ruta, paint):
-    pass
+    return paint_mostrar(paint)
+    
 
 def guardar_ppm(paint):
-    pass
+    return paint_mostrar(paint)
 
 def guardar_jpg(paint):
-    ruta = gamelib.input("en que ruta quiere guardar el archivo?")
+    ruta = gamelib.input(MENSAJE_EN_DONDE_GUARDAR_ARCHIVO)
     paleta = []
     for i in range(len(paint["tablero"])):
-        for j in range(len(paint(["tablero"]))):
+        for j in range(len(paint["tablero"])):
             if not paint["tablero"][i][j] in paleta:
                 paleta.append(paint["tablero"][i][j])
     png.escribir(ruta, paleta, paint["tablero"])
 
-def nuevo_color():
-    pass
+def nuevo_color(paint):
+    color_seleccionado = gamelib.input(MENSAJE_ELIJA_COLOR)
+    if color_seleccionado == None:
+        gamelib.say(MENSAJE_NO_ELIGIO_COLOR)
+        return paint_mostrar(paint)
+    color_seleccionado = color_seleccionado.split(",")
+    color_seleccionado = [int(numeros) for numeros in color_seleccionado]
+    color_seleccionado = tuple(color_seleccionado)
+    while len(color_seleccionado) > 3:
+        nuevo_color(paint)
+    paint["numero_color"] = color_seleccionado
+
 def main():
     gamelib.title("AlgoPaint")
     gamelib.resize(ANCHO_VENTANA, ALTO_VENTANA)
@@ -137,31 +176,7 @@ def main():
             print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y # averiguamos la posición donde se hizo click
             #botones(paint, x, y)
-            if x > 10 and x < 40 and y > 200 and y < 230:
-                paint["numero_color"] = BLACK
-            elif x > 10 and x < 40 and y > 230 and y < 260:
-                paint["numero_color"] = WHITE
-            elif x > 10 and x < 40 and y > 260 and y < 290:
-                paint["numero_color"] = RED 
-            elif x > 10 and x < 40 and y > 290 and y < 320:
-                paint["numero_color"] = GREEN
-            elif x > 10 and x < 40 and y > 320 and y < 350:
-                paint["numero_color"] = BLUE 
-            elif x > 10 and x < 40 and y > 350 and y < 380:
-                paint["numero_color"] = CYAN
-            elif x > 10 and x < 40 and y > 380 and y < 410:
-                paint["numero_color"] = YELLOW
-            elif x > 10 and x < 40 and y > 410 and y < 440:
-                paint["numero_color"] = MAGENTA
-            elif x > 50 and y > 650 and x < 190 and y < 680:
-                ruta = gamelib.input("Ingrese ruta del archivo")
-                cargar_archivo(ruta, paint)
-            elif x > 190 + 30 and y > 650 and x < 360 and y < 680:
-                guardar_ppm(paint)
-            elif x > 390 and y > 650 and x < 360 + 30 + 140 and y < 680:
-                guardar_jpg(paint)
-            else:
-                pass
+            paint = paint_actualizar(paint, x, y)
             
         elif ev.type == gamelib.EventType.Motion:
             print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
@@ -172,10 +187,6 @@ def main():
         #if ev.type == gamelib.EventType.ButtonPress:
             # El usuario presionó un botón del mouse
         
-        if ev.type == gamelib.EventType.ButtonPress and ev.mouse_button == 1:
-            print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
-            x, y = ev.x, ev.y
-            paint = actualizar_juego(paint, x, y)
         
         
 gamelib.init(main)
