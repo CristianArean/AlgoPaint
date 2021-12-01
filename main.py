@@ -19,7 +19,8 @@ MENSAJE_NO_ELIGIO_COLOR = "No se eligió ningun color"
 MENSAJE_EN_DONDE_GUARDAR_ARCHIVO = "en que ruta quiere guardar el archivo?"
 MENSAJE_RUTA = "Ingrese ruta del archivo"
 MENSAJE_EXCEPCION_NUEVO_COLOR = "Hubo un problema con el color ingresado, asegurese de escribirlo correctamente"
-
+ELIJA_NOMBRE_ARCHIVO = "Ingrese un nombre para el archivo"
+MENSAJE_DE_GUARDADO_SATISFACTORIO = "la imagen se guardo correctamente"
 
 def paint_nuevo(ancho, alto):
     '''inicializa el estado del programa con una imagen vacía de ancho x alto pixels'''
@@ -137,8 +138,34 @@ def cargar_archivo(ruta, paint):
     return paint_mostrar(paint)
     
 
+def formato(paint):
+    paint = paint["tablero"]
+    string_final = ""
+    maximo = -1
+    for i in range(20):
+        segundo_string = ""
+        for j in range(20):
+            primer_string = ""
+            for valores in paint[i][j]:
+                if valores > maximo:
+                    maximo = valores
+                primer_string += str(valores)
+                primer_string += " "
+            segundo_string += primer_string
+        string_final += segundo_string
+    return string_final, maximo
+
 def guardar_ppm(paint):
-    return paint_mostrar(paint)
+    file, maximo = formato(paint)
+    nombre_del_archivo = gamelib.input(ELIJA_NOMBRE_ARCHIVO)
+    if nombre_del_archivo == None or nombre_del_archivo == "":
+        return paint_mostrar(paint)
+    with open(f"{nombre_del_archivo}.ppm", "w") as outf:
+        outf.write("P3\n")
+        outf.write(f"{ALTO_TABLERO} {ANCHO_TABLERO}\n")
+        outf.write(str(maximo) + "\n")
+        outf.write(file)
+    gamelib.say(MENSAJE_DE_GUARDADO)
 
 def guardar_png(paint):
     ruta = gamelib.input(MENSAJE_EN_DONDE_GUARDAR_ARCHIVO)
