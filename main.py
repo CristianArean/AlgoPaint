@@ -18,6 +18,8 @@ MENSAJE_ELIJA_COLOR = "ingrese en formato r, g, b el color que quiere ingresar"
 MENSAJE_NO_ELIGIO_COLOR = "No se eligió ningun color"
 MENSAJE_EN_DONDE_GUARDAR_ARCHIVO = "en que ruta quiere guardar el archivo?"
 MENSAJE_RUTA = "Ingrese ruta del archivo"
+MENSAJE_EXCEPCION_NUEVO_COLOR = "Hubo un problema con el color ingresado, asegurese de escribirlo correctamente"
+
 
 def paint_nuevo(ancho, alto):
     '''inicializa el estado del programa con una imagen vacía de ancho x alto pixels'''
@@ -32,7 +34,7 @@ def paint_nuevo(ancho, alto):
     
     paint["tablero"] = tablero
     paint["color_str"] = "white"
-
+    print(paint["tablero"])
     return paint
 
 def copiador(paint):
@@ -46,7 +48,7 @@ def copiador(paint):
     return nuevo_tablero
 
 def paint_actualizar(paint, x, y):
-    nuevo_tablero = copiador(paint)
+   
     if x > 10 and x < 40 and y > 200 and y < 230: #dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
         paint["numero_color"] = BLACK
     elif x > 10 and x < 40 and y > 230 and y < 260:
@@ -75,12 +77,11 @@ def paint_actualizar(paint, x, y):
     elif x > 50 and x < 650 and y > 45 and y < 645:
         filas = int((y - 50) / 30)
         columnas = int((x - 45) / 30)
-        nuevo_tablero[filas][columnas] = paint["numero_color"]
+        paint["tablero"][filas][columnas] = paint["numero_color"]
 
-    paint["tablero"] = nuevo_tablero
-    return paint
 
 def paint_mostrar(paint):
+
     '''dibuja la interfaz de la aplicación en la ventana'''
     gamelib.draw_begin()
     gamelib.draw_rectangle(0, 0, ANCHO_VENTANA, ALTO_VENTANA, fill="gray")
@@ -106,6 +107,7 @@ def paint_mostrar(paint):
     pos_inicial_y1 = 195
     pos_inicial_y2 = 225
     indice = 0
+
     for colores in COLORES:
         gamelib.draw_rectangle(10, pos_inicial_y1, 40, pos_inicial_y2, fill=colores)  # cuadrados
         pos_inicial_y1 += 30
@@ -138,7 +140,7 @@ def cargar_archivo(ruta, paint):
 def guardar_ppm(paint):
     return paint_mostrar(paint)
 
-def guardar_jpg(paint):
+def guardar_png(paint):
     ruta = gamelib.input(MENSAJE_EN_DONDE_GUARDAR_ARCHIVO)
     paleta = []
     for i in range(len(paint["tablero"])):
@@ -149,12 +151,16 @@ def guardar_jpg(paint):
 
 def nuevo_color(paint):
     color_seleccionado = gamelib.input(MENSAJE_ELIJA_COLOR)
-    if color_seleccionado == None:
+    if color_seleccionado == None or color_seleccionado == "":
         gamelib.say(MENSAJE_NO_ELIGIO_COLOR)
         return paint_mostrar(paint)
-    color_seleccionado = color_seleccionado.split(",")
-    color_seleccionado = [int(numeros) for numeros in color_seleccionado]
-    color_seleccionado = tuple(color_seleccionado)
+    try:
+        color_seleccionado = color_seleccionado.split(",")
+        color_seleccionado = [int(numeros) for numeros in color_seleccionado]
+        color_seleccionado = tuple(color_seleccionado)
+    except:
+        gamelib.say(MENSAJE_EXCEPCION_NUEVO_COLOR)
+        return paint_mostrar(paint)
     while len(color_seleccionado) > 3:
         nuevo_color(paint)
     paint["numero_color"] = color_seleccionado
@@ -176,7 +182,7 @@ def main():
             print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y # averiguamos la posición donde se hizo click
             #botones(paint, x, y)
-            paint = paint_actualizar(paint, x, y)
+            paint_actualizar(paint, x, y)
             
         elif ev.type == gamelib.EventType.Motion:
             print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
