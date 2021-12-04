@@ -35,7 +35,7 @@ def paint_nuevo(ancho, alto):
     
     paint["tablero"] = tablero
     paint["color_str"] = "white"
-    print(paint["tablero"])
+
     return paint
 
 def copiador(paint):
@@ -48,38 +48,52 @@ def copiador(paint):
 
     return nuevo_tablero
 
+def copiador_dicc(dicc):
+    nuevo_dicc = {}
+    for clave, valor in dicc.items():
+        nuevo_dicc[clave] = valor
+
+    return nuevo_dicc
+
 def paint_actualizar(paint, x, y):
-   
+    nuevo_paint = copiador_dicc(paint)  
     if x > 10 and x < 40 and y > 200 and y < 230: #dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
-        paint["numero_color"] = BLACK
+        nuevo_paint["numero_color"] = BLACK
     elif x > 10 and x < 40 and y > 230 and y < 260:
-        paint["numero_color"] = WHITE
+        nuevo_paint["numero_color"] = WHITE
     elif x > 10 and x < 40 and y > 260 and y < 290:
-        paint["numero_color"] = RED 
+        nuevo_paint["numero_color"] = RED 
     elif x > 10 and x < 40 and y > 290 and y < 320:
-        paint["numero_color"] = GREEN
+        nuevo_paint["numero_color"] = GREEN
     elif x > 10 and x < 40 and y > 320 and y < 350:
-        paint["numero_color"] = BLUE 
+        nuevo_paint["numero_color"] = BLUE 
     elif x > 10 and x < 40 and y > 350 and y < 380:
-        paint["numero_color"] = CYAN
+        nuevo_paint["numero_color"] = CYAN
     elif x > 10 and x < 40 and y > 380 and y < 410:
-        paint["numero_color"] = YELLOW
+        nuevo_paint["numero_color"] = YELLOW
     elif x > 10 and x < 40 and y > 410 and y < 440:
-        paint["numero_color"] = MAGENTA
+        nuevo_paint["numero_color"] = MAGENTA
     elif x > 10 and x < 40 and y > 440 and y < 470:
-        nuevo_color(paint)
+        nuevo_color(nuevo_paint)
     elif x > 50 and y > 650 and x < 190 and y < 680:
         ruta = gamelib.input(MENSAJE_RUTA)
-        cargar_archivo(ruta, paint)
+
+        if ruta == "" or ruta == None:
+            return paint
+
+        tablero = cargar_archivo(ruta)
+        nuevo_paint["tablero"] = tablero
+        gamelib.say("se cargo correctamente")
     elif x > 190 + 30 and y > 650 and x < 360 and y < 680:
-        guardar_ppm(paint)
+        guardar_ppm(nuevo_paint)
     elif x > 390 and y > 650 and x < 360 + 30 + 140 and y < 680:
-        guardar_jpg(paint)
+        guardar_jpg(nuevo_paint)
     elif x > 50 and x < 650 and y > 45 and y < 645:
         filas = int((y - 50) / 30)
         columnas = int((x - 45) / 30)
-        paint["tablero"][filas][columnas] = paint["numero_color"]
+        nuevo_paint["tablero"][filas][columnas] = nuevo_paint["numero_color"]
 
+    return nuevo_paint
 
 def paint_mostrar(paint):
 
@@ -107,7 +121,7 @@ def paint_mostrar(paint):
 
     pos_inicial_y1 = 195
     pos_inicial_y2 = 225
-    indice = 0
+    ndice = 0
 
     for colores in COLORES:
         gamelib.draw_rectangle(10, pos_inicial_y1, 40, pos_inicial_y2, fill=colores)  # cuadrados
@@ -134,9 +148,30 @@ def paint_mostrar(paint):
 
     gamelib.draw_end()
 
-def cargar_archivo(ruta, paint):
-    return paint_mostrar(paint)
-    
+def str_a_tablero(cadena):
+    tablero = []
+    indice_global = 0
+
+    for i in range(20):
+        fila = []
+        while len(fila) < 20:
+            if indice_global % 3 == 0:
+                lista = cadena[indice_global:indice_global + 3]
+                lista = [int(x) for x in lista]
+                tupla = tuple(lista)
+                fila.append(tupla)
+            indice_global += 1
+        tablero.append(fila)
+
+    return tablero
+
+def cargar_archivo(archivo):
+    with open(archivo) as file:
+        lines = file.readlines()
+        lines = [line.rstrip() for line in lines][3]
+        lines = lines.split()
+    tablero = str_a_tablero(lines)
+    return tablero
 
 def formato(paint):
     paint = paint["tablero"]
@@ -209,7 +244,7 @@ def main():
             print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y # averiguamos la posición donde se hizo click
             #botones(paint, x, y)
-            paint_actualizar(paint, x, y)
+            paint = paint_actualizar(paint, x, y)
             
         elif ev.type == gamelib.EventType.Motion:
             print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
