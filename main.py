@@ -23,26 +23,26 @@ MENSAJE_EXCEPCION_NUEVO_COLOR = "Hubo un problema con el color ingresado, asegur
 ELIJA_NOMBRE_ARCHIVO = "Ingrese un nombre para el archivo"
 MENSAJE_DE_GUARDADO_SATISFACTORIO = "la imagen se guardo correctamente"
 # 50 #primer pixel en que arranca el tablero
-POS_INICIAL_X1 = ANCHO_VENTANA * 7.1428 / 100
+POS_INICIAL_X1 = ANCHO_VENTANA * 7.1428 / 100  # 50
 POS_INICIAL_Y1 = ALTO_VENTANA * 6.4285 / 100  # 45
 # 80 pixel en el que termina el primer cuadrado
 POS_INICIAL_X2 = ANCHO_VENTANA * 11.4285 / 100
 POS_INICIAL_Y2 = ALTO_VENTANA * 10.7142 / 100  # 75
 LADO_CUADRADO = POS_INICIAL_X2 - POS_INICIAL_X1  # 30
-X1_COLORES = 10
-Y1_COLORES = 195
-X2_COLORES = 40
-Y2_COLORES = 225
+X1_COLORES = ANCHO_VENTANA * 1.429 / 100
+Y1_COLORES = ALTO_VENTANA * 27.857 / 100
+X2_COLORES = ANCHO_VENTANA * 5.714 / 100
+Y2_COLORES = ALTO_VENTANA * 32.143 / 100
 
 
-def paint_nuevo(ancho, alto):
+def paint_nuevo():
     '''inicializa el estado del programa con una imagen vacía de ancho x alto pixels'''
     paint = {}
     paint["numero_color"] = WHITE
     tablero = []
-    for i in range(ALTO_TABLERO):
+    for _ in range(ALTO_TABLERO):
         filas = []
-        for j in range(ANCHO_TABLERO):
+        for _ in range(ANCHO_TABLERO):
             filas.append(paint["numero_color"])
         tablero.append(filas)
 
@@ -73,40 +73,52 @@ def copiador_dicc(dicc):
 
 def paint_actualizar(paint, x, y):
     nuevo_paint = copiador_dicc(paint)
-    if x > 10 and x < 40 and y > 200 and y < 230:  # dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
-        nuevo_paint["numero_color"] = BLACK
-    elif x > 10 and x < 40 and y > 230 and y < 260:
-        nuevo_paint["numero_color"] = WHITE
-    elif x > 10 and x < 40 and y > 260 and y < 290:
-        nuevo_paint["numero_color"] = RED
-    elif x > 10 and x < 40 and y > 290 and y < 320:
-        nuevo_paint["numero_color"] = GREEN
-    elif x > 10 and x < 40 and y > 320 and y < 350:
-        nuevo_paint["numero_color"] = BLUE
-    elif x > 10 and x < 40 and y > 350 and y < 380:
-        nuevo_paint["numero_color"] = CYAN
-    elif x > 10 and x < 40 and y > 380 and y < 410:
-        nuevo_paint["numero_color"] = YELLOW
-    elif x > 10 and x < 40 and y > 410 and y < 440:
-        nuevo_paint["numero_color"] = MAGENTA
-    elif x > 10 and x < 40 and y > 440 and y < 470:
-        nuevo_color(nuevo_paint)
-    elif x > 50 and y > 650 and x < 190 and y < 680:
-        ruta = gamelib.input(MENSAJE_RUTA)
 
+    # dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
+    if x > X1_COLORES and x < X2_COLORES and y > Y1_COLORES and y < Y2_COLORES:
+        nuevo_paint["numero_color"] = BLACK
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + (LADO_CUADRADO)) and y < (Y2_COLORES + (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = WHITE
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 2 * (LADO_CUADRADO)) and y < (Y2_COLORES + 2 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = RED
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 3 * (LADO_CUADRADO)) and y < (Y2_COLORES + 3 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = GREEN
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 4 * (LADO_CUADRADO)) and y < (Y2_COLORES + 4 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = BLUE
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 5 * (LADO_CUADRADO)) and y < (Y2_COLORES + 5 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = CYAN
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 6 * (LADO_CUADRADO)) and y < (Y2_COLORES + 6 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = YELLOW
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 7 * (LADO_CUADRADO)) and y < (Y2_COLORES + 7 * (LADO_CUADRADO)):
+        nuevo_paint["numero_color"] = MAGENTA
+
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 8 * (LADO_CUADRADO)) and y < (Y2_COLORES + 8 * (LADO_CUADRADO)):
+        nuevo_color(nuevo_paint)
+
+    elif x > POS_INICIAL_X1 and y > (ALTO_VENTANA * 92.857 / 100) and x < (ANCHO_VENTANA * 27.143 / 100) and y < (ALTO_VENTANA * 97.143 / 100):
+        ruta = gamelib.input(MENSAJE_RUTA)
         if ruta == "" or ruta == None:
             return paint
-
         tablero = cargar_archivo(ruta)
         nuevo_paint["tablero"] = tablero
         gamelib.say("se cargo correctamente")
-    elif x > 190 + 30 and y > 650 and x < 360 and y < 680:
+
+    elif x > (ANCHO_VENTANA * 31.429 / 100) and y > (ALTO_VENTANA * 92.857 / 100) and x < ANCHO_VENTANA * 51.429 / 100 and y < (ALTO_VENTANA * 97.143 / 100):
         guardar_ppm(nuevo_paint)
-    elif x > 390 and y > 650 and x < 360 + 30 + 140 and y < 680:
+
+    elif x > (ANCHO_VENTANA * 55.714 / 100) and y > (ALTO_VENTANA * 92.857 / 100) and x < (ANCHO_VENTANA * 75.714 / 100) + LADO_CUADRADO + 140 and y < (ALTO_VENTANA * 97.143 / 100):
         guardar_png(nuevo_paint)
-    elif x > 50 and x < 650 and y > 45 and y < 645:
-        filas = int((y - 50) / LADO_CUADRADO)
-        columnas = int((x - 45) / LADO_CUADRADO)
+
+    elif x > POS_INICIAL_X1 and x < ANCHO_VENTANA * 92.857 / 100 and y > POS_INICIAL_Y1 and y < (ALTO_VENTANA * 92.143 / 100):
+        filas = int((y - POS_INICIAL_X1) / LADO_CUADRADO)
+        columnas = int((x - POS_INICIAL_Y1) / LADO_CUADRADO)
         nuevo_paint["tablero"][filas][columnas] = nuevo_paint["numero_color"]
 
     return nuevo_paint
@@ -121,8 +133,6 @@ def paint_mostrar(paint):
     pos_inicial_y1 = POS_INICIAL_Y1
     pos_inicial_x2 = POS_INICIAL_X2
     pos_inicial_y2 = POS_INICIAL_Y2
-    lado_cuadrado = LADO_CUADRADO
-    # print(paint["tablero"])
 
     for i in range(len(paint["tablero"])):
         for j in range(len(paint["tablero"])):
@@ -142,6 +152,7 @@ def paint_mostrar(paint):
     y1_colores = Y1_COLORES
     x2_colores = X2_COLORES
     y2_colores = Y2_COLORES
+
     for colores in COLORES:
         gamelib.draw_rectangle(x1_colores, y1_colores, x2_colores,
                                y2_colores, fill=colores)  # cuadrados
@@ -152,22 +163,24 @@ def paint_mostrar(paint):
     gamelib.draw_image('signo_mas.gif', x1_colores, y1_colores)
 
     # boton de guardado
-    pos_inicial_x = 50
-    pos_inicial_y = 650
-    pos_final_x = 190
-    pos_final_y = 680
+    pos_inicial_x = ANCHO_VENTANA * 7.1428 / 100  # 50
+    pos_inicial_y = ALTO_VENTANA * 92.857 / 100  # 650
+    pos_final_x = ANCHO_VENTANA * 27.143 / 100  # 190
+    pos_final_y = ALTO_VENTANA * 97.143 / 100  # 680
+    pos_y_medio = (pos_final_y + pos_inicial_y) / 2
     # for botones in range(3): #el tres son cantidad de botones
 
     gamelib.draw_rectangle(pos_inicial_x, pos_inicial_y, pos_final_x,
                            pos_final_y, fill="silver")  # cantidad de botones
-    gamelib.draw_text("cargar PPM", 120, 665, bold=True)  # cantidad de botones
-    gamelib.draw_rectangle(190 + 30, pos_inicial_y, 360,
+    gamelib.draw_text("cargar PPM", ANCHO_VENTANA * 17.143 /
+                      100, pos_y_medio, bold=True)  # cantidad de botones
+    gamelib.draw_rectangle(ANCHO_VENTANA * 31.429 / 100, pos_inicial_y, ANCHO_VENTANA * 51.429 / 100,
                            pos_final_y, fill="silver")
-    gamelib.draw_text("guardar PPM", 290, 665,
+    gamelib.draw_text("guardar PPM", ANCHO_VENTANA * 41.329 / 100, pos_y_medio,
                       bold=True)  # cantidad de botones
-    gamelib.draw_rectangle(360 + 30, pos_inicial_y, 360 +
-                           30 + 140, pos_final_y, fill="silver")
-    gamelib.draw_text("guardar JPG", 460, 665,
+    gamelib.draw_rectangle(ANCHO_VENTANA * 55.714 / 100, pos_inicial_y,
+                           ANCHO_VENTANA * 75.714 / 100, pos_final_y, fill="silver")
+    gamelib.draw_text("guardar JPG", ANCHO_VENTANA * 65.714 / 100, pos_y_medio,
                       bold=True)  # cantidad de botones
 
     gamelib.draw_end()
@@ -231,14 +244,29 @@ def guardar_ppm(paint):
     gamelib.say(MENSAJE_DE_GUARDADO_SATISFACTORIO)
 
 
-def guardar_png(paint):
-    ruta = gamelib.input(MENSAJE_EN_DONDE_GUARDAR_ARCHIVO)
+def colores(matriz):
     paleta = []
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            if not matriz[i][j] in paleta:
+                paleta.append(matriz[i][j])
+    return paleta
+
+
+def guardar_png(paint):
+    nombre = gamelib.input(ELIJA_NOMBRE_ARCHIVO)
+    if nombre == None or nombre == "":
+        return paint_mostrar(paint)
+    paleta = colores(paint["tablero"])
+    juego_comprimido = []
     for i in range(len(paint["tablero"])):
-        for j in range(len(paint["tablero"])):
-            if not paint["tablero"][i][j] in paleta:
-                paleta.append(paint["tablero"][i][j])
-    png.escribir(ruta, paleta, paint["tablero"])
+        filas = []
+        for j in range(len(paint["tablero"][i])):
+            indice_en_paleta = paleta.index(paint["tablero"][i][j])
+            filas.append(indice_en_paleta)
+        juego_comprimido.append(filas)
+
+    png.escribir(f"{nombre}.png", paleta, juego_comprimido)
 
 
 def nuevo_color(paint):
@@ -262,7 +290,7 @@ def main():
     gamelib.title("AlgoPaint")
     gamelib.resize(ANCHO_VENTANA, ALTO_VENTANA)
 
-    paint = paint_nuevo(ALTO_TABLERO, ANCHO_TABLERO)
+    paint = paint_nuevo()
 
     while gamelib.is_alive():
         paint_mostrar(paint)
