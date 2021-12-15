@@ -1,3 +1,4 @@
+from tda import Pila
 import gamelib
 import png
 
@@ -33,6 +34,10 @@ X1_COLORES = ANCHO_VENTANA * 1.429 / 100
 Y1_COLORES = ALTO_VENTANA * 27.857 / 100
 X2_COLORES = ANCHO_VENTANA * 5.714 / 100
 Y2_COLORES = ALTO_VENTANA * 32.143 / 100
+IMG_LAPIZ = "lapiz.gif"
+BOTE_DE_PINTURA = "bote_de_pintura.gif"
+IMG_GIF = "signo_mas.gif"
+IMG_DESHACER = "deshacer.gif"
 
 
 def paint_nuevo():
@@ -40,6 +45,9 @@ def paint_nuevo():
     paint = {}
     paint["numero_color"] = WHITE
     tablero = []
+    deshacer = Pila()
+    paint["deshacer"] = deshacer
+    paint["modo"] = "lapiz"
     for _ in range(ALTO_TABLERO):
         filas = []
         for _ in range(ANCHO_TABLERO):
@@ -47,7 +55,6 @@ def paint_nuevo():
         tablero.append(filas)
 
     paint["tablero"] = tablero
-    paint["color_str"] = "white"
 
     return paint
 
@@ -69,6 +76,14 @@ def copiador_dicc(dicc):
         nuevo_dicc[clave] = valor
 
     return nuevo_dicc
+
+
+def esta_vacia(paint):
+    for i in range(len(paint["tablero"])):
+        for j in range(len(paint["tablero"][0])):
+            if paint["tablero"][i][j] != 0:
+                return False
+        return True
 
 
 def paint_actualizar(paint, x, y):
@@ -101,7 +116,19 @@ def paint_actualizar(paint, x, y):
 
     elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 8 * (LADO_CUADRADO)) and y < (Y2_COLORES + 8 * (LADO_CUADRADO)):
         nuevo_color(nuevo_paint)
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 9 * (LADO_CUADRADO)) and y < (Y2_COLORES + 9 * (LADO_CUADRADO)):
 
+        if paint["deshacer"].esta_vacia():
+            gamelib.say("La pila esta vacia")
+        else:
+            nuevo_paint["tablero"] = nuevo_paint["deshacer"].desapilar()
+            print(nuevo_paint["tablero"])
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 10 * (LADO_CUADRADO)) and y < (Y2_COLORES + 10 * (LADO_CUADRADO)):
+        if nuevo_paint["modo"] == "lapiz":
+            nuevo_paint["modo"] = "balde"
+        elif nuevo_paint["modo"] == "balde":
+            nuevo_paint["modo"] = "lapiz"
+            
     elif x > POS_INICIAL_X1 and y > (ALTO_VENTANA * 92.857 / 100) and x < (ANCHO_VENTANA * 27.143 / 100) and y < (ALTO_VENTANA * 97.143 / 100):
         ruta = gamelib.input(MENSAJE_RUTA)
         if ruta == "" or ruta == None:
@@ -117,11 +144,19 @@ def paint_actualizar(paint, x, y):
         guardar_png(nuevo_paint)
 
     elif x > POS_INICIAL_X1 and x < ANCHO_VENTANA * 92.857 / 100 and y > POS_INICIAL_Y1 and y < (ALTO_VENTANA * 92.143 / 100):
+        nuevo_paint["deshacer"].apilar(paint["tablero"])
+        print("este es el apile\n")
         filas = int((y - POS_INICIAL_X1) / LADO_CUADRADO)
         columnas = int((x - POS_INICIAL_Y1) / LADO_CUADRADO)
-        nuevo_paint["tablero"][filas][columnas] = nuevo_paint["numero_color"]
-
+        if nuevo_paint["modo"] == "lapiz":
+            nuevo_paint["tablero"][filas][columnas] = nuevo_paint["numero_color"]
+        elif nuevo_paint["modo"] == "balde":
+            color_previo = nuevo_paint["tablero"][filas][columnas]
+            if color_previo == nuevo_paint["numero_color"]: #esto soluciona un bug que hacia que de muchas recursiones
+                return nuevo_paint
+            nuevo_paint = balde_pintura(nuevo_paint, filas, columnas, color_previo)
     return nuevo_paint
+
 
 
 def paint_mostrar(paint):
@@ -158,9 +193,16 @@ def paint_mostrar(paint):
                                y2_colores, fill=colores)  # cuadrados
         y1_colores += LADO_CUADRADO
         y2_colores += LADO_CUADRADO
-        x1_colores
 
-    gamelib.draw_image('signo_mas.gif', x1_colores, y1_colores)
+    gamelib.draw_image(IMG_GIF, x1_colores, y1_colores)
+    gamelib.draw_image(IMG_DESHACER, x1_colores, y1_colores + LADO_CUADRADO)
+    if paint["modo"] == "lapiz":
+        gamelib.draw_image(BOTE_DE_PINTURA, x1_colores,
+                        y1_colores + 2 * LADO_CUADRADO)
+    elif paint["modo"] == "balde":
+        gamelib.draw_image(IMG_LAPIZ, x1_colores,
+                        y1_colores + 2 * LADO_CUADRADO)
+        
 
     # boton de guardado
     pos_inicial_x = ANCHO_VENTANA * 7.1428 / 100  # 50
@@ -168,7 +210,6 @@ def paint_mostrar(paint):
     pos_final_x = ANCHO_VENTANA * 27.143 / 100  # 190
     pos_final_y = ALTO_VENTANA * 97.143 / 100  # 680
     pos_y_medio = (pos_final_y + pos_inicial_y) / 2
-    # for botones in range(3): #el tres son cantidad de botones
 
     gamelib.draw_rectangle(pos_inicial_x, pos_inicial_y, pos_final_x,
                            pos_final_y, fill="silver")  # cantidad de botones
@@ -202,6 +243,22 @@ def str_a_tablero(cadena):
         tablero.append(fila)
 
     return tablero
+
+
+
+def balde_pintura(paint, filas, columnas, color_previo):
+    if paint["tablero"][filas][columnas] == color_previo:
+        paint["tablero"][filas][columnas] = paint["numero_color"]
+        if filas > 0:
+            paint = balde_pintura(paint, filas - 1, columnas, color_previo)
+        if filas < ALTO_TABLERO - 1:
+            paint = balde_pintura(paint, filas + 1, columnas, color_previo)
+        if columnas > 0:
+            paint = balde_pintura(paint, filas, columnas - 1, color_previo)
+        if columnas < ANCHO_TABLERO - 1:
+            paint = balde_pintura(paint, filas, columnas + 1, color_previo)
+    return paint     
+
 
 
 def cargar_archivo(archivo):
@@ -299,19 +356,19 @@ def main():
         if not ev:
             break
         if ev.type == gamelib.EventType.ButtonPress and ev.mouse_button == 1:
-            print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
+            # print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y  # averiguamos la posición donde se hizo click
-            #botones(paint, x, y)
+            # botones(paint, x, y)
             paint = paint_actualizar(paint, x, y)
 
-        elif ev.type == gamelib.EventType.Motion:
-            print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
+        """elif ev.type == gamelib.EventType.Motion:
+            # print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
         elif ev.type == gamelib.EventType.ButtonRelease and ev.mouse_button == 1:
             print(f'se ha soltado el botón del mouse: {ev.x} {ev.y}')
         elif ev.type == gamelib.EventType.KeyPress:
-            print(f'se ha presionado la tecla: {ev.key}')
+            print(f'se ha presionado la tecla: {ev.key}')"""
         # if ev.type == gamelib.EventType.ButtonPress:
-            # El usuario presionó un botón del mouse
+        # El usuario presionó un botón del mouse
 
 
 gamelib.init(main)
