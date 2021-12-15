@@ -38,15 +38,21 @@ IMG_LAPIZ = "lapiz.gif"
 BOTE_DE_PINTURA = "bote_de_pintura.gif"
 IMG_GIF = "signo_mas.gif"
 IMG_DESHACER = "deshacer.gif"
-
+IMG_REHACER = "rehacer.gif"
+MENSAJE_DESHACER = "No hay elementos para deshacer"
+MENSAJE_REHACER = "No hay elementos para rehacer"
+MSG_CARGA_CORRECTA = "Se cargo correctamente"
+CARGAR_PPM = "CARGAR PPM"
+GUARDAR_PPM = "GUARDAR PPM"
+GUARDAR_PNG = "GUARDAR PNG"
 
 def paint_nuevo():
     '''inicializa el estado del programa con una imagen vacía de ancho x alto pixels'''
     paint = {}
     paint["numero_color"] = WHITE
     tablero = []
-    deshacer = Pila()
-    paint["deshacer"] = deshacer
+    paint["deshacer"] = Pila()
+    paint["rehacer"] = Pila()
     paint["modo"] = "lapiz"
     for _ in range(ALTO_TABLERO):
         filas = []
@@ -88,6 +94,7 @@ def esta_vacia(paint):
 
 def paint_actualizar(paint, x, y):
     nuevo_paint = copiador_dicc(paint)
+    nuevo_paint_aux = copiador_dicc(paint)
 
     # dato para posterior escalabilidad: ese numero que se suma, 30 en este caso, es la cantidad de pixeles que tiene un cuadrado en un lado
     if x > X1_COLORES and x < X2_COLORES and y > Y1_COLORES and y < Y2_COLORES:
@@ -117,13 +124,22 @@ def paint_actualizar(paint, x, y):
     elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 8 * (LADO_CUADRADO)) and y < (Y2_COLORES + 8 * (LADO_CUADRADO)):
         nuevo_color(nuevo_paint)
     elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 9 * (LADO_CUADRADO)) and y < (Y2_COLORES + 9 * (LADO_CUADRADO)):
-
+        #deshacer
         if paint["deshacer"].esta_vacia():
-            gamelib.say("La pila esta vacia")
+            gamelib.say(MENSAJE_DESHACER)
         else:
+            nuevo_paint["rehacer"].apilar(nuevo_paint["tablero"])
             nuevo_paint["tablero"] = nuevo_paint["deshacer"].desapilar()
-            print(nuevo_paint["tablero"])
+
     elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 10 * (LADO_CUADRADO)) and y < (Y2_COLORES + 10 * (LADO_CUADRADO)):
+        #rehacer
+        if paint["rehacer"].esta_vacia():
+            gamelib.say(MENSAJE_REHACER)
+        else:
+            nuevo_paint["deshacer"].apilar(nuevo_paint["tablero"])
+            nuevo_paint["tablero"] = nuevo_paint["rehacer"].desapilar()
+    
+    elif x > X1_COLORES and x < X2_COLORES and y > (Y1_COLORES + 11 * (LADO_CUADRADO)) and y < (Y2_COLORES + 11 * (LADO_CUADRADO)):
         if nuevo_paint["modo"] == "lapiz":
             nuevo_paint["modo"] = "balde"
         elif nuevo_paint["modo"] == "balde":
@@ -135,7 +151,7 @@ def paint_actualizar(paint, x, y):
             return paint
         tablero = cargar_archivo(ruta)
         nuevo_paint["tablero"] = tablero
-        gamelib.say("se cargo correctamente")
+        gamelib.say(MSG_CARGA_CORRECTA)
 
     elif x > (ANCHO_VENTANA * 31.429 / 100) and y > (ALTO_VENTANA * 92.857 / 100) and x < ANCHO_VENTANA * 51.429 / 100 and y < (ALTO_VENTANA * 97.143 / 100):
         guardar_ppm(nuevo_paint)
@@ -144,8 +160,8 @@ def paint_actualizar(paint, x, y):
         guardar_png(nuevo_paint)
 
     elif x > POS_INICIAL_X1 and x < ANCHO_VENTANA * 92.857 / 100 and y > POS_INICIAL_Y1 and y < (ALTO_VENTANA * 92.143 / 100):
-        nuevo_paint["deshacer"].apilar(paint["tablero"])
-        print("este es el apile\n")
+        nuevo_paint_aux = copiador(paint)
+        nuevo_paint["deshacer"].apilar(nuevo_paint_aux)
         filas = int((y - POS_INICIAL_X1) / LADO_CUADRADO)
         columnas = int((x - POS_INICIAL_Y1) / LADO_CUADRADO)
         if nuevo_paint["modo"] == "lapiz":
@@ -196,12 +212,14 @@ def paint_mostrar(paint):
 
     gamelib.draw_image(IMG_GIF, x1_colores, y1_colores)
     gamelib.draw_image(IMG_DESHACER, x1_colores, y1_colores + LADO_CUADRADO)
+    gamelib.draw_image(IMG_REHACER, x1_colores, y1_colores + 2 * LADO_CUADRADO)
+    
     if paint["modo"] == "lapiz":
         gamelib.draw_image(BOTE_DE_PINTURA, x1_colores,
-                        y1_colores + 2 * LADO_CUADRADO)
+                        y1_colores + 3 * LADO_CUADRADO)
     elif paint["modo"] == "balde":
         gamelib.draw_image(IMG_LAPIZ, x1_colores,
-                        y1_colores + 2 * LADO_CUADRADO)
+                        y1_colores + 3 * LADO_CUADRADO)
         
 
     # boton de guardado
@@ -213,15 +231,15 @@ def paint_mostrar(paint):
 
     gamelib.draw_rectangle(pos_inicial_x, pos_inicial_y, pos_final_x,
                            pos_final_y, fill="silver")  # cantidad de botones
-    gamelib.draw_text("cargar PPM", ANCHO_VENTANA * 17.143 /
+    gamelib.draw_text(CARGAR_PPM, ANCHO_VENTANA * 17.143 /
                       100, pos_y_medio, bold=True)  # cantidad de botones
     gamelib.draw_rectangle(ANCHO_VENTANA * 31.429 / 100, pos_inicial_y, ANCHO_VENTANA * 51.429 / 100,
                            pos_final_y, fill="silver")
-    gamelib.draw_text("guardar PPM", ANCHO_VENTANA * 41.329 / 100, pos_y_medio,
+    gamelib.draw_text(GUARDAR_PPM, ANCHO_VENTANA * 41.329 / 100, pos_y_medio,
                       bold=True)  # cantidad de botones
     gamelib.draw_rectangle(ANCHO_VENTANA * 55.714 / 100, pos_inicial_y,
                            ANCHO_VENTANA * 75.714 / 100, pos_final_y, fill="silver")
-    gamelib.draw_text("guardar JPG", ANCHO_VENTANA * 65.714 / 100, pos_y_medio,
+    gamelib.draw_text(GUARDAR_PNG, ANCHO_VENTANA * 65.714 / 100, pos_y_medio,
                       bold=True)  # cantidad de botones
 
     gamelib.draw_end()
@@ -356,19 +374,9 @@ def main():
         if not ev:
             break
         if ev.type == gamelib.EventType.ButtonPress and ev.mouse_button == 1:
-            # print(f'se ha presionado el botón del mouse: {ev.x} {ev.y}')
             x, y = ev.x, ev.y  # averiguamos la posición donde se hizo click
-            # botones(paint, x, y)
             paint = paint_actualizar(paint, x, y)
 
-        """elif ev.type == gamelib.EventType.Motion:
-            # print(f'se ha movido el puntero del mouse: {ev.x} {ev.y}')
-        elif ev.type == gamelib.EventType.ButtonRelease and ev.mouse_button == 1:
-            print(f'se ha soltado el botón del mouse: {ev.x} {ev.y}')
-        elif ev.type == gamelib.EventType.KeyPress:
-            print(f'se ha presionado la tecla: {ev.key}')"""
-        # if ev.type == gamelib.EventType.ButtonPress:
-        # El usuario presionó un botón del mouse
-
+        
 
 gamelib.init(main)
