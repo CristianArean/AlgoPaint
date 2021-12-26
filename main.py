@@ -14,7 +14,8 @@ BLUE = (0, 0, 255)
 CYAN = (0, 255, 255)
 YELLOW = (255, 255, 0)
 MAGENTA = (255, 0, 255)
-COLORES = (BLACK, WHITE, RED, GREEN, BLUE, CYAN, YELLOW, MAGENTA)
+COLORES = ("black", "white", "red", "green",
+           "blue", "cyan", "yellow", "magenta")
 MENSAJE_ELIJA_COLOR = "ingrese en formato r, g, b el color que quiere ingresar"
 MENSAJE_NO_ELIGIO_COLOR = "No se eligió ningun color"
 MENSAJE_EN_DONDE_GUARDAR_ARCHIVO = "en que ruta quiere guardar el archivo?"
@@ -230,17 +231,17 @@ def paint_mostrar(paint):
     pos_y_medio = (pos_final_y + pos_inicial_y) / 2
 
     gamelib.draw_rectangle(pos_inicial_x, pos_inicial_y, pos_final_x,
-                           pos_final_y, fill="silver")  
+                           pos_final_y, fill="silver")  # cantidad de botones
     gamelib.draw_text(CARGAR_PPM, ANCHO_VENTANA * 17.143 /
-                      100, pos_y_medio, bold=True)  
+                      100, pos_y_medio, bold=True)  # cantidad de botones
     gamelib.draw_rectangle(ANCHO_VENTANA * 31.429 / 100, pos_inicial_y, ANCHO_VENTANA * 51.429 / 100,
                            pos_final_y, fill="silver")
     gamelib.draw_text(GUARDAR_PPM, ANCHO_VENTANA * 41.329 / 100, pos_y_medio,
-                      bold=True)  
+                      bold=True)  # cantidad de botones
     gamelib.draw_rectangle(ANCHO_VENTANA * 55.714 / 100, pos_inicial_y,
                            ANCHO_VENTANA * 75.714 / 100, pos_final_y, fill="silver")
     gamelib.draw_text(GUARDAR_PNG, ANCHO_VENTANA * 65.714 / 100, pos_y_medio,
-                      bold=True)  
+                      bold=True)  # cantidad de botones
 
     gamelib.draw_end()
 
@@ -377,5 +378,6 @@ def main():
             x, y = ev.x, ev.y  # averiguamos la posición donde se hizo click
             paint = paint_actualizar(paint, x, y)
 
+        
 
 gamelib.init(main)
